@@ -6,7 +6,30 @@ on:
 
 jobs:
   release:
-    uses: epam/ai-dial-ci/.github/workflows/java_release.yml@2.4.0
+    uses: taa-epam/ai-dial-ci/.github/workflows/java_release.yml@44b2ddefb559b6497df9b3a7e7f8dd99bb31a19a
     secrets: inherit
+    strategy:
+      fail-fast: false # Let all builds finish
+      matrix:
+        include:
+          # - platform: "linux/amd64"
+          #   runner: "ubuntu-24.04"
+          #   arch: "amd64"
+          - platform: "linux/arm64"
+            runner: "ubuntu-24.04-arm"
+            arch: "arm64"
+            ort-bypassed: true
+            trivy-enabled: false
+
+          - platform: "linux/arm64"
+            runner: "ubuntu-24.04"
+            arch: "arm64"
+            ort-bypassed: true
+            trivy-enabled: false
     with:
-      platforms: "linux/amd64,linux/arm64"
+      runs-on: '["${{ matrix.runner }}"]'
+      platforms: "${{ matrix.platform }}"
+      # maximize-build-space: true
+      dockerhub-image-name: ltaa/ai-dial-core
+      ort-bypassed: "${{ matrix.ort-bypassed }}"
+      trivy-enabled: "${{ matrix.trivy-enabled }}"
